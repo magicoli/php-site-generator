@@ -1,6 +1,11 @@
-### PLAN.md
+# PLAN
 
-# Générateur de site statique PHP pour projet GitHub
+Générateur de site statique PHP pour projet GitHub
+
+## Dependencies
+```
+composer require erusev/parsedown
+```
 
 ## Objectif
 Générer un site statique basé sur un dépôt GitHub contenant une librairie PHP, sans alourdir le dépôt lui-même.

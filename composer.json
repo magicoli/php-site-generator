@@ -1,0 +1,20 @@
+{
+    "name": "magicoli/php-site-generator",
+    "description": "PHP static site generator for GitHub projects",
+    "type": "project",
+    "license": "AGPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Magicoli\\PhpSiteGenerator\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Olivier van Helden (oshelpers)",
+            "email": "olivier@van-helden.net"
+        }
+    ],
+    "require": {
+        "erusev/parsedown": "^1.7"
+    }
+}
