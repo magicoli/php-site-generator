@@ -1,26 +1,54 @@
 <?php
-require_once "vendor/autoload.php"; // Changed: load full Parsedown via Composer
+require_once "vendor/autoload.php"; // load full Parsedown via Composer
 
 $config = json_decode(file_get_contents("config.json"), true);
 $parsedown = new Parsedown();
 
 $github_user = $config["github_user"];
 $repo = $config["repo"];
+
+# Exit if GitHub user or repo is not set
+if (empty($github_user) || empty($repo)) {
+    die( "Error: GitHub user or repo not set in config.json.\n");
+}
+
+$github_token = $config["github_token"] ?? null;
+$github_branch = $config["github_branch"] ?? 'master'; // default to master if not set
 $menu = $config["menu"];
-$output_folder = empty($config["output_folder"]) ? "output" : $config["output_folder"];
+$output_folder = $config["output_folder"] ?? "output";
 $output_folder = rtrim($output_folder, "/"); // Remove trailing slash if present
 
 # Exit with error if output folder is not writable
 if (!is_writable($output_folder)) {
-    echo "Error: Output folder '$output_folder' does not exist or is not writable.\n";
-    exit(1);
+    die( "Error: Output folder '$output_folder' does not exist or is not writable.\n");
 }
 
 function fetch_markdown($user, $repo, $file) {
-    // $url = "https://raw.githubusercontent.com/$user/$repo/main/$file";
-    // $url = "https://api.github.com/repos/$user/$repo/contents/$file";
-    $url = "https://raw.githubusercontent.com/$user/$repo/refs/heads/master/$file";
-    return file_get_contents($url);
+    global $github_token;
+    global $github_branch;
+    if (!empty($github_token)) {
+        // Use GitHub API with token
+        $url = "https://api.github.com/repos/$user/$repo/contents/$file?ref=$github_branch";
+        $opts = [
+            "http" => [
+                "header" => "User-Agent: PHP\r\n" .
+                            "Authorization: token $github_token\r\n"
+            ]
+        ];
+        $context = stream_context_create($opts);
+        $result = file_get_contents($url, false, $context);
+        if ($result !== false) {
+            $json = json_decode($result, true);
+            if (isset($json["content"]) && $json["encoding"] === "base64") {
+                return base64_decode($json["content"]);
+            }
+        }
+    } else {
+        // Use raw URL if no token is set
+        $url = "https://raw.githubusercontent.com/$user/$repo/refs/heads/master/$file";
+        return file_get_contents($url);
+    }
+    return "";
 }
 
 function render_page($title, $content, $menu_html) {
@@ -47,7 +75,7 @@ foreach ($menu as $item) {
     }
 
     $output = render_page($title, $html, $menu_html);
-    file_put_contents("$output_folder/{$file}.html", $output); // Use output_folder
+    file_put_contents("$output_folder/{$file}.html", $output);
 }
 
 // Générer page d'accueil à partir de README.md
@@ -58,6 +86,6 @@ foreach ($menu as $m) {
     $menu_html .= "<li><a href='{$m["file"]}.html'>{$m["title"]}</a></li>";
 }
 $home_output = render_page("Accueil", $home, $menu_html);
-file_put_contents("$output_folder/index.html", $home_output); // Use output_folder
+file_put_contents("$output_folder/index.html", $home_output);
 
 echo "Site généré dans $output_folder\n";
