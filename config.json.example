@@ -1,7 +1,7 @@
 {
   "github_user": "magicoli",
   "repo": "opensim-helpers",
-  "output": "../www",
+  "output_folder": "../www",
   "menu": [
     { "title": "Installation", "file": "INSTALLATION.md" },
     { "title": "Troubleshooting", "file": "TROUBLESHOOTING.md" },
