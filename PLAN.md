@@ -13,61 +13,78 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 ## Features
 
 - [x] Home page generated from `README.md`
-- [x] Additional pages generated from `.md` files (INSTALLATION.md, TROUBLESHOOTING.md…)
-- [ ] Downloads page (info on the latest stable release + changelog)
-- [ ] Issues page (simplified view of open issues)
-- [ ] Donations page with Stripe / PayPal links
+- [x] Additional Markdown pages (e.g., `INSTALLATION.md`, `TROUBLESHOOTING.md`)
+- [ ] Downloads page (fetch GitHub Releases info; to be implemented)
+- [ ] Issues page (fetch GitHub Issues data; to be implemented)
+- [ ] Donations page with Stripe / PayPal integration (to be implemented)
 
 ## Structure
 
+```
 /php-backend/
-├── config.json            // Simple configuration for the site and pages
+├── config.json            // Configuration for the site and pages
 ├── generate.php           // Main script to generate the static site
 ├── template.php           // HTML template for the pages
 ├── Parsedown.php          // Markdown parser → HTML
-├── /assets/               // CSS, images
-└── /pages/                // Local Markdown files (if needed)
+├── assets/                // CSS, images
+│   └── style.css          // Custom styling (prefer Bootstrap classes)
+└── pages/                 // Local Markdown files (if needed)
 
-/www/                      // Result of generated static site, separate from the backend (set in config.json)
+../output/                     // Generated static site (output folder defined in config.json)
+├── assets
+│   └── style.css
+├── donate.html
+├── downloads.html
 ├── index.html
-├── installation/
-├── troubleshooting/
-...
-
-## Sample configuration
-
-```php
-return [
-  'github_user' => 'magicoli',
-  'repo' => 'opensim-helpers',
-  'menu' => [
-    ['title' => 'OpenSim Helpers', 'file' => 'README.md'],
-    ['title' => 'Installation', 'file' => 'INSTALLATION.md'],
-    ['title' => 'Troubleshooting', 'file' => 'TROUBLESHOOTING.md'],
-    ['title' => 'Downloads', 'file' => 'downloads'],
-    ['title' => 'Issues', 'file' => 'issues'],
-    ['title' => 'Donate', 'file' => 'donate'],
-  ],
-];
+├── installation.html
+├── issues.html
+├── troubleshooting.html
+└── ...
 ```
 
-## Steps of the `generate.php` script
+## Sample Configuration (config.json)
 
-1. Load the config
-2. Download Markdown files from GitHub (via raw.githubusercontent.com)
-3. Convert Markdown to HTML with Parsedown
-4. Inject into a common HTML template
-5. Generate special pages:
-   - downloads: call to the GitHub Releases API
-   - issues: call to the GitHub Issues API
-   - donate: static HTML based on config
-6. Save in output folder set in config output_folder paremeter
+````json
+{
+  "title": "Site Title",
+  "github_user": "magicoli",
+  "repo": "opensim-helpers",
+  "github_branch": "master",
+  "github_token": "your_token_here", // optional
+  "output_folder": "output",
+  "menu": [
+    { "title": "OpenSim Helpers", "file": "README.md" },
+    { "title": "Installation", "file": "INSTALLATION.md" },
+    { "title": "Troubleshooting", "file": "TROUBLESHOOTING.md" },
+    { "title": "Downloads", "file": "downloads" },
+    { "title": "Issues", "file": "issues" },
+    { "title": "Donate", "file": "donate" }
+  ]
+}
+````
 
-## Tasks to do
+## Steps of the generate.php Script
 
-- [ ] Write the Markdown fetcher
-- [ ] Handle local caching (optional)
-- [ ] Create the HTML template
-- [ ] Generate dynamic navigation/menu
-- [ ] Add special pages
-- [ ] Plan for minimal customization (favicon, project name, etc.)
+1. Load the `config.json`.
+2. Download Markdown files from GitHub using raw URLs or the GitHub API.
+3. Convert Markdown to HTML using Parsedown.
+4. Inject content into a common HTML template (`template.php`).
+5. Dynamically generate navigation menus.
+6. Generate special pages (Downloads, Issues, Donate) as placeholders or with API data.
+7. Copy assets to the output folder.
+8. Save all pages in the specified output folder.
+
+## Tasks & To-Dos
+
+- [x] Implement Markdown fetcher in `generate.php`.
+- [ ] (Optional) Add local caching for fetched Markdown.
+- [x] Create a responsive HTML template in `template.php`.
+- [x] Generate dynamic navigation menus.
+- Implement special pages
+  - [ ] Downloads
+  - [ ] Issues
+  - [ ] Donate
+- [ ] Enable minimal customization options
+  - [ ] favicon
+  - [x] project name
+  - ...
