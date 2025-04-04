@@ -16,6 +16,6 @@ _The form is sent privately to the maintainers of the project. If they feel it i
 
 ## Open Issues
 
-Browse all (open and solved) issues on [GitHub Issues Page](https://github.com/magicoli/opensim-helpers/issues?q=is%3Aissue).
-
 {{issues_content}}
+
+Browse all (open and solved) issues on [GitHub Issues Page](https://github.com/magicoli/opensim-helpers/issues?q=is%3Aissue).

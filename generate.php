@@ -123,7 +123,9 @@ function build_menu_html($menu, $file = "", $slug = "") {
     // Build friendly menu with active highlighting
     $menu_html = "";
     foreach ($menu as $m) {
-        if (stripos($m["file"], ".md") !== false) {
+        if ( '/' === $m["file"] ) {
+            $link = "/";
+        } else if (stripos($m["file"], ".md") !== false) {
             $menu_slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
             $link = $menu_slug . ".html";
         } else if ( 'support' === $m["file"] ) {
@@ -216,7 +218,7 @@ foreach ($menu as $item) {
 // Generate homepage from README.md
 $readme = fetch_markdown($github_user, $repo, "README.md");
 $home = $parsedown->text($readme); // Convert Markdown to HTML
-$menu_html = build_menu_html($menu);
+$menu_html = build_menu_html($menu, '/');
 $home_output = render_page("Home", $home, $menu_html);
 file_put_contents("$output_folder/index.html", $home_output);
 
