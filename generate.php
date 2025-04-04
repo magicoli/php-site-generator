@@ -157,11 +157,11 @@ foreach ($menu as $item) {
         $md = fetch_markdown($github_user, $repo, $file);
         $html = $parsedown->text($md); // Convert Markdown to HTML
     } else {
-        if ($file === "downloads") {
+        if ($file === "download") {
             // Fetch latest stable release data
             $release = fetch_latest_release($github_user, $repo);
-            // Load the Markdown template for the downloads page
-            $template = file_get_contents("pages/downloads.md");
+            // Load the Markdown template for the download page
+            $template = file_get_contents("pages/download.md");
             
             if ($release) {
                 $version = htmlspecialchars($release['tag_name']);

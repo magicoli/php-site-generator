@@ -14,7 +14,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 
 - [x] Home page generated from `README.md`
 - [x] Additional Markdown pages (e.g., `INSTALLATION.md`, `TROUBLESHOOTING.md`)
-- [x] Downloads page (fetch GitHub Releases info)
+- [x] Download page (fetch GitHub Releases info)
 - [ ] Support page (fetch GitHub Support data; to be implemented)
 - [ ] Donations page with Stripe / PayPal integration (to be implemented)
 
@@ -34,7 +34,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 ├── assets
 │   └── style.css
 ├── donate.html
-├── downloads.html
+├── download.html
 ├── index.html
 ├── installation.html
 ├── support.php
@@ -46,7 +46,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 
 ````json
 {
-  "title": "Site Title",
+  "title": "Site Object",
   "github_user": "magicoli",
   "repo": "opensim-helpers",
   "github_branch": "master",
@@ -56,7 +56,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
     { "title": "OpenSim Helpers", "file": "README.md" },
     { "title": "Installation", "file": "INSTALLATION.md" },
     { "title": "Troubleshooting", "file": "TROUBLESHOOTING.md" },
-    { "title": "Downloads", "file": "downloads" },
+    { "title": "Download", "file": "download" },
     { "title": "Support", "file": "support" },
     { "title": "Donate", "file": "donate" }
   ]
@@ -70,7 +70,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 3. Convert Markdown to HTML using Parsedown.
 4. Inject content into a common HTML template (`template.php`).
 5. Dynamically generate navigation menus.
-6. Generate special pages (Downloads, Support, Donate) as placeholders or with API data.
+6. Generate special pages (Download, Support, Donate) as placeholders or with API data.
 7. Copy assets to the output folder.
 8. Save all pages in the specified output folder.
 
@@ -81,7 +81,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 - [x] Create a responsive HTML template in `template.php`.
 - [x] Generate dynamic navigation menus.
 - Implement special pages
-  - [x] Downloads
+  - [x] Download
   - [ ] Support
   - [ ] Donate
 - [ ] Enable minimal customization options
