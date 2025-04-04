@@ -71,7 +71,7 @@ foreach ($menu as $item) {
         $md = fetch_markdown($github_user, $repo, $file);
         $html = $parsedown->text($md); // Convert Markdown to HTML
     } else {
-        $html = "<p>Page spéciale : <strong>$file</strong> (à implémenter)</p>";
+        $html = "<p>Special page: <strong>$file</strong> (to be implemented)</p>";
     }
 
     // Build friendly menu with active highlighting
@@ -91,7 +91,7 @@ foreach ($menu as $item) {
     file_put_contents("$output_folder/{$slug}.html", $output);
 }
 
-// Générer page d'accueil à partir de README.md
+// Generate homepage from README.md
 $readme = fetch_markdown($github_user, $repo, "README.md");
 $home = $parsedown->text($readme); // Convert Markdown to HTML
 $menu_html = ""; // Ensure menu_html is defined for the homepage
@@ -105,10 +105,10 @@ foreach ($menu as $m) {
     // No active item for homepage
     $menu_html .= "<li class='nav-item'><a class='nav-link' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
 }
-$home_output = render_page("Accueil", $home, $menu_html);
+$home_output = render_page("Home", $home, $menu_html);
 file_put_contents("$output_folder/index.html", $home_output);
 
-echo "Site généré dans $output_folder\n";
+echo "Site generated in $output_folder\n";
 
 // Recursively copy assets folder to output folder
 function recursive_copy($src, $dst) {
