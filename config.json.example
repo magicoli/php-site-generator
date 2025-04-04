@@ -6,7 +6,7 @@
     { "title": "Installation", "file": "INSTALLATION.md" },
     { "title": "Troubleshooting", "file": "TROUBLESHOOTING.md" },
     { "title": "Downloads", "file": "downloads" },
-    { "title": "Support", "file": "issues" },
+    { "title": "Support", "file": "support" },
     { "title": "Donate", "file": "donate" }
   ]
 }

@@ -6,7 +6,7 @@
 
 3. **Otherwise**, use the form below.
 
-In all communications, make sure to include relevant details of your setup (project version, operating system, OpenSimulator version, php version, ...).
+In all cases, make sure to include relevant details of your setup (project version, operating system, OpenSimulator version, php version, ...).
 
 ### Submit a Support Request
 

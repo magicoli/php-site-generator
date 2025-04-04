@@ -37,7 +37,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 ├── downloads.html
 ├── index.html
 ├── installation.html
-├── issues.html
+├── support.php
 ├── troubleshooting.html
 └── ...
 ```
@@ -57,7 +57,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
     { "title": "Installation", "file": "INSTALLATION.md" },
     { "title": "Troubleshooting", "file": "TROUBLESHOOTING.md" },
     { "title": "Downloads", "file": "downloads" },
-    { "title": "Support", "file": "issues" },
+    { "title": "Support", "file": "support" },
     { "title": "Donate", "file": "donate" }
   ]
 }
