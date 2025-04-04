@@ -3,7 +3,7 @@
         'name' => 'magicoli/php-site-generator',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '2ad76d4efe2bf62f0fd34bd6f3a6d03bbdac8d7f',
+        'reference' => 'c34066d7a29117088116ab2cf20025e6e7f0cf8d',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'magicoli/php-site-generator' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '2ad76d4efe2bf62f0fd34bd6f3a6d03bbdac8d7f',
+            'reference' => 'c34066d7a29117088116ab2cf20025e6e7f0cf8d',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
