@@ -119,6 +119,24 @@ function render_page($title, $content, $menu_html) {
     return ob_get_clean();
 }
 
+function build_menu_html($menu, $file = "", $slug = "") {
+    // Build friendly menu with active highlighting
+    $menu_html = "";
+    foreach ($menu as $m) {
+        if (stripos($m["file"], ".md") !== false) {
+            $menu_slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
+            $link = $menu_slug . ".html";
+        } else if ( 'issues' === $m["file"] ) {
+            $link = $m["file"] . ".php";
+        } else {
+            $link = $m["file"] . ".html";
+        }
+        $active = ($m["file"] === $file) ? 'active strong' : '';
+        $menu_html .= "<li class='nav-item $active'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
+    }
+    return $menu_html;
+}
+
 foreach ($menu as $item) {
     $file = $item["file"];
     $slug = strtolower(pathinfo($file, PATHINFO_FILENAME));
@@ -188,20 +206,7 @@ foreach ($menu as $item) {
         }
     }
 
-    // Build friendly menu with active highlighting
-    $menu_html = "";
-    foreach ($menu as $m) {
-        if (stripos($m["file"], ".md") !== false) {
-            $menu_slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
-            $link = $menu_slug . ".html";
-        } else if ( 'issues' === $m["file"] ) {
-            $link = $m["file"] . ".php";
-        } else {
-            $link = $m["file"] . ".html";
-        }
-        $active = ($m["file"] === $file) ? 'active strong' : '';
-        $menu_html .= "<li class='nav-item $active'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
-    }
+    $menu_html = build_menu_html($menu, $file);
 
     $output_filename = ($file === "issues") ? "$output_folder/{$slug}.php" : "$output_folder/{$slug}.html";
     $output = render_page($title, $html, $menu_html);
@@ -211,17 +216,7 @@ foreach ($menu as $item) {
 // Generate homepage from README.md
 $readme = fetch_markdown($github_user, $repo, "README.md");
 $home = $parsedown->text($readme); // Convert Markdown to HTML
-$menu_html = ""; // Ensure menu_html is defined for the homepage
-foreach ($menu as $m) {
-    if (stripos($m["file"], ".md") !== false) {
-        $slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
-        $link = $slug . ".html";
-    } else {
-        $link = $m["file"] . ".html";
-    }
-    // No active item for homepage
-    $menu_html .= "<li class='nav-item'><a class='nav-link' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
-}
+$menu_html = build_menu_html($menu);
 $home_output = render_page("Home", $home, $menu_html);
 file_put_contents("$output_folder/index.html", $home_output);
 
