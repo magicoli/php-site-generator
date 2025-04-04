@@ -23,6 +23,10 @@ This tool automatically generates a static website based on your GitHub reposito
 - Favicon customization
 - Theme customization options
 
+### See in action
+
+- https://opensim-helpers.dev/
+
 ## Installation
 
 1. Clone this repository:
