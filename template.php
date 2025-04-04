@@ -30,14 +30,26 @@
   </div>
   <div class="container-fluid">
     <div class="row">
-      <!-- Sidebar for large screens -->
-      <nav class="col-lg-3 d-none d-lg-block bg-light nav-pills">
+      <!-- Sidebar for large screens with fixed position elements -->
+      <nav class="col-lg-3 d-none d-lg-block bg-light nav-pills position-relative min-vh-100">
+        <!-- Sidebar header -->
         <div class="sticky-top bg-light">
-          <div class="sidebar-brand py-3 border-bottom ">
+          <div class="sidebar-brand py-3 border-bottom">
             <a href="index.html" class="text-decoration-none text-dark fw-bold fs-4"><?= htmlspecialchars($site_title) ?></a>
           </div>
-          <ul class="nav flex-column py-3">
-            <?= $menu_html ?>
+          <!-- Menu section - should scroll independently -->
+          <div style="max-height: calc(100vh - 150px); overflow-y: auto;">
+            <ul class="nav flex-column py-3">
+              <?= $menu_html ?>
+            </ul>
+          </div>
+        </div>
+        <!-- Footer with fixed position at bottom -->
+        <div class="d-flex flex-column bg-dark text-white p-3 d-lg-block position-fixed bottom-0" style="width: calc(25% - 24px); max-width: inherit;">
+          <ul class="list-unstyled">
+            <li><?= htmlspecialchars($site_title) ?> by <a href="https://speculoos.world" class="text-white" target="_blank">Speculoos World</a></li>
+            <li>GitHub: <nobr><a href="https://github.com/<?= htmlspecialchars($github_user) ?>/<?= htmlspecialchars($repo) ?>" target="_blank" class="text-white"><?= htmlspecialchars($github_user) ?>/<?= htmlspecialchars($repo) ?></a></nobr></li>
+            <li>License: <a href="https://www.gnu.org/licenses/agpl-3.0.en.html target="_blank" class="text-white text-decoration-underline">AGPLv3</a></li>
           </ul>
         </div>
       </nav>
@@ -46,12 +58,13 @@
       </main>
     </div>
   </div>
-  <footer class="bg-dark text-white p-3">
-    <div class="container d-flex flex-column flex-lg-row justify-content-between align-items-center">
-      <a href="index.html" class="text-white text-decoration-none"><?= htmlspecialchars($site_title) ?></a>
-      <span>View on GitHub <nobr><a href="https://github.com/<?= htmlspecialchars($github_user) ?>/<?= htmlspecialchars($repo) ?>" target="_blank" class="text-white"><?= htmlspecialchars($github_user) ?>/<?= htmlspecialchars($repo) ?></a></nobr></span>
-      <span>License <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank" class="text-white text-decoration-underline">AGPLv3</a></span>
-    </div>
+  <!-- Mobile footer: shown only on mobile below the whole page -->
+  <footer class="bg-dark text-white p-3 d-lg-none">
+    <ul class="list-unstyled">
+      <li><?= htmlspecialchars($site_title) ?> by <a href="https://speculoos.world" class="text-white" target="_blank">Speculoos World</a></li>
+      <li>GitHub: <nobr><a href="https://github.com/<?= htmlspecialchars($github_user) ?>/<?= htmlspecialchars($repo) ?>" target="_blank" class="text-white"><?= htmlspecialchars($github_user) ?>/<?= htmlspecialchars($repo) ?></a></nobr></li>
+      <li>License: <a href="https://www.gnu.org/licenses/agpl-3.0.en.html target="_blank" class="text-white text-decoration-underline">AGPLv3</a></li>
+    </ul>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
