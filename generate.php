@@ -63,6 +63,7 @@ function render_page($title, $content, $menu_html) {
 
 foreach ($menu as $item) {
     $file = $item["file"];
+    $slug = strtolower(pathinfo($file, PATHINFO_FILENAME));
     $title = $item["title"];
     $html = "";
 
@@ -77,17 +78,17 @@ foreach ($menu as $item) {
     $menu_html = "";
     foreach ($menu as $m) {
         if (stripos($m["file"], ".md") !== false) {
-            $slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
-            $link = $slug . ".html";
+            $menu_slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
+            $link = $menu_slug . ".html";
         } else {
             $link = $m["file"] . ".html";
         }
-        $active = ($m["file"] === $file) ? 'active' : '';
+        $active = ($m["file"] === $file) ? 'active strong' : '';
         $menu_html .= "<li class='nav-item'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
     }
 
     $output = render_page($title, $html, $menu_html);
-    file_put_contents("$output_folder/{$file}.html", $output);
+    file_put_contents("$output_folder/{$slug}.html", $output);
 }
 
 // Générer page d'accueil à partir de README.md
