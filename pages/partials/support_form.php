@@ -24,8 +24,8 @@ if ( empty($support_email) ) {
 
 $issue_title = trim($_POST['issue_title'] ?? '');
 $issue_description = trim($_POST['issue_description'] ?? '');
-$contact_email = trim($_POST['contact_email'] ?? '');
-$contact_name = trim($_POST['contact_name'] ?? '');
+$user_email = trim($_POST['user_email'] ?? '');
+$user_name = trim($_POST['user_name'] ?? '');
 $success = false;
 $errors = []; // Initialize errors array
 
@@ -38,10 +38,10 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
     if (empty($issue_description)) {
         $errors['issue_description'] = "Issue description is required";
     }
-    if (empty($contact_email)) {
-        $errors['contact_email'] = "Contact email is required";
-    } elseif (!filter_var($contact_email, FILTER_VALIDATE_EMAIL)) {
-        $errors['contact_email'] = "Invalid email format";
+    if (empty($user_email)) {
+        $errors['user_email'] = "Contact email is required";
+    } elseif (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) {
+        $errors['user_email'] = "Invalid email format";
     }
     
     // Process if no validation errors
@@ -56,8 +56,8 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
             <body>
                 <h2>Thank you for your support request</h2>
                 <p>We have received your support request with the following details:</p>
-                <p><strong>Title:</strong> {$issue_title}</p>
-                <p><strong>Description:</strong> {$issue_description}</p>
+                <p><strong>Object:</strong> {$issue_title}</p>
+                <p><strong>Message:</strong> {$issue_description}</p>
                 <p>We'll review your request and get back to you as soon as possible.</p>
                 <p>Best regards,<br>The {$site_name} Team</p>
             </body>
@@ -76,26 +76,26 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
         <head><title>New Support Request</title></head>
         <body>
         <h2>New Support Request Received</h2>
-        <p><strong>From:</strong> " . (!empty($contact_name) ? "{$contact_name} ({$contact_email})" : $contact_email) . "</p>
-        <p><strong>Title:</strong> {$issue_title}</p>
-        <p><strong>Description:</strong> {$issue_description}</p>
+        <p><strong>From:</strong> " . (!empty($user_name) ? "{$user_name} ({$user_email})" : $user_email) . "</p>
+        <p><strong>Object:</strong> {$issue_title}</p>
+        <p><strong>Message:</strong> {$issue_description}</p>
         </body>
         </html>
         ";
         
         $notification_headers = "MIME-Version: 1.0" . "\r\n";
         $notification_headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $notification_headers .= "From: {$contact_name} <{$sender_email}>" . "\r\n";
-        $notification_headers .= "Reply-To: {$contact_name} <{$contact_email}>" . "\r\n";
+        $notification_headers .= "From: {$user_name} <{$sender_email}>" . "\r\n";
+        $notification_headers .= "Reply-To: {$user_name} <{$user_email}>" . "\r\n";
         
         $notification_sent = mail($support_email, $notification_subject, $notification_message, $notification_headers);
         if( $notification_sent ) {
             $success = true;
-            $confirmation_sent = mail($contact_email, $confirmation_subject, $confirmation_message, $headers);
+            $confirmation_sent = mail($user_email, $confirmation_subject, $confirmation_message, $headers);
             if( !$confirmation_sent ) {
-                $errors['contact_email'] = sprintf(
+                $errors['user_email'] = sprintf(
                     'Confirmation mail to %s failed, but support has been notified.',
-                    htmlspecialchars($contact_email),
+                    htmlspecialchars($user_email),
                 );
             }
         } else {
@@ -123,11 +123,11 @@ if ($success) {
             <p>(Actually, it was not processed, we are only simulating the success message)</p>
             <ul class="mb-0">
                 <li>Contact: <a href="mailto:%s">%s</a></li>
-                <li>Title: %s</li>
-                <li>Description: %s</li>
+                <li>Object: %s</li>
+                <li>Message: %s</li>
             </ul></div>',
-        htmlspecialchars($contact_email),
-        htmlspecialchars(empty($contact_name) ? $contact_email : $contact_name),
+        htmlspecialchars($user_email),
+        htmlspecialchars(empty($user_name) ? $user_email : $user_name),
         htmlspecialchars($issue_title),
         htmlspecialchars($issue_description),
     );
@@ -136,25 +136,25 @@ if ($success) {
     $form = sprintf(
         '<form method="post">
             <div class="mb-3">
-                <label for="contact_name" class="form-label">Contact Name</label>
-                <input type="text" class="form-control" id="contact_name" name="contact_name" value="%s">
+                <label for="user_name" class="form-label">Your name</label>
+                <input type="text" class="form-control" id="user_name" name="user_name" value="%s">
             </div>
             <div class="mb-3">
-                <label for="contact_email" class="form-label">Contact Email (required)</label>
-                <input type="email" class="form-control" id="contact_email" name="contact_email" value="%s" required>
+                <label for="user_email" class="form-label">Your email address (required)</label>
+                <input type="email" class="form-control" id="user_email" name="user_email" value="%s" required>
             </div>
             <div class="mb-3">
-                <label for="issue_title" class="form-label">Issue Title (required)</label>
+                <label for="issue_title" class="form-label">Subject (required)</label>
                 <input type="text" class="form-control" id="issue_title" name="issue_title" value="%s" required>
             </div>
             <div class="mb-3">
-                <label for="issue_description" class="form-label">Issue Description (required)</label>
+                <label for="issue_description" class="form-label">Message (required)</label>
                 <textarea class="form-control" id="issue_description" name="issue_description" rows="5" required>%s</textarea>
             </div>
             <button type="submit" name="submit" value="support_request" class="btn btn-primary">Submit Issue</button>
         </form>',
-        htmlspecialchars($contact_name),
-        htmlspecialchars($contact_email),
+        htmlspecialchars($user_name),
+        htmlspecialchars($user_email),
         htmlspecialchars($issue_title),
         htmlspecialchars($issue_description),
     );
@@ -163,8 +163,8 @@ if ($success) {
 
 ## Following is the Old proposal, likely to be removed, ignore it
 
-// if (!empty($contact_email)) {
-//     $issue_description .= "\n\nContact Email: " . $contact_email;
+// if (!empty($user_email)) {
+//     $issue_description .= "\n\nContact Email: " . $user_email;
 // }
 
 // $data = array(

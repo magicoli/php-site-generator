@@ -8,13 +8,13 @@
 
 In all cases, make sure to include relevant details of your setup (project version, operating system, OpenSimulator version, php version, ...).
 
-### Submit a Support Request
+### Contact developers
 
 _The form is sent privately to the maintainers of the project. If they feel it is of public interest, they might publish your request (with personal data redacted) on GitHub Issues page and ask you to follow up from there._
 
 {{support_form}}
 
-## Open Issues
+### Known Issues
 
 {{issues_content}}
 
