@@ -4,8 +4,8 @@ $github_user = "{{github_user}}";
 $repo = "{{github_repo}}";
 $github_token = "{{github_token}}";
 $site_name = "{{title}}";
-$site_name = "OpenSim Helpers";
-$admin_email = "gudule@speculoos.world"; // Change to project maintainer's email
+$support_email = "{{support_email}}";
+$sender_email = "{{sender_email}}";
 
 // This page will be included in the main template, do not exit
 
@@ -57,9 +57,10 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
         
         $headers = "MIME-Version: 1.0" . "\r\n";
         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $headers .= "From: {$site_name} <{$admin_email}>" . "\r\n";
+        $headers .= "From: {$site_name} <{$sender_email}>" . "\r\n";
+        $headers .= "Reply-To: {$support_email}" . "\r\n";
 
-        // Send notification to admin
+        // Send notification to admin with reply-to set to contact email
         $notification_subject = "[Support Request] {$issue_title}";
         $notification_message = "
         <html>
@@ -73,7 +74,12 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
         </html>
         ";
         
-        $notification_sent = mail($admin_email, $notification_subject, $notification_message, $headers);
+        $notification_headers = "MIME-Version: 1.0" . "\r\n";
+        $notification_headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $notification_headers .= "From: {$site_name} <{$sender_email}>" . "\r\n";
+        $notification_headers .= "Reply-To: {$contact_email}" . "\r\n";
+        
+        $notification_sent = mail($support_email, $notification_subject, $notification_message, $notification_headers);
         if( $notification_sent ) {
             $success = true;
             $confirmation_sent = mail($contact_email, $confirmation_subject, $confirmation_message, $headers);

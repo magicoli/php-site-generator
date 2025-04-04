@@ -4,8 +4,6 @@ require_once "vendor/autoload.php"; // load full Parsedown via Composer
 $config = json_decode(file_get_contents("config.json"), true);
 $parsedown = new Parsedown();
 
-$site_title = $config["title"] ?? "Site";
-
 $github_user = $config["github_user"];
 $repo = $config["repo"];
 
@@ -14,9 +12,14 @@ if (empty($github_user) || empty($repo)) {
     die( "Error: GitHub user or repo not set in config.json.\n");
 }
 
+$site_title = $config["title"] ?? "Site";
+$menu = $config["menu"];
+$support_email = $config["support_email"] ?? null;
+$sender_email = $config["sender_email"] ?? $config["support_email"] ?? null;
+
 $github_token = $config["github_token"] ?? null;
 $github_branch = $config["github_branch"] ?? 'master'; // default to master if not set
-$menu = $config["menu"];
+
 $output_folder = $config["output_folder"] ?? "output";
 $output_folder = rtrim($output_folder, "/"); // Remove trailing slash if present
 
@@ -248,8 +251,15 @@ echo "Assets copied to $output_folder/assets\n";
 // NEW: Generate parsed support_form.php in the output folder using the template from pages/partials/support_form.php
 $issueFormTemplate = file_get_contents("pages/partials/support_form.php");
 $issueFormContent = str_replace(
-    ['{{github_user}}', '{{github_repo}}', '{{github_token}}'],
-    [htmlspecialchars($github_user), htmlspecialchars($repo), htmlspecialchars($github_token)],
+    ['{{github_user}}', '{{github_repo}}', '{{github_token}}', '{{title}}', '{{support_email}}', '{{sender_email}}'],
+    [
+        htmlspecialchars($github_user), 
+        htmlspecialchars($repo), 
+        htmlspecialchars($github_token),
+        htmlspecialchars($site_title),
+        htmlspecialchars($support_email),
+        htmlspecialchars($sender_email)
+    ],
     $issueFormTemplate
 );
 file_put_contents("$output_folder/support_form.php", $issueFormContent);
