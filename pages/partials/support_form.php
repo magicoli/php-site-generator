@@ -70,7 +70,7 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
         $headers .= "Reply-To: {$support_email}" . "\r\n";
 
         // Send notification to admin with reply-to set to contact email
-        $notification_subject = "[Support Request] {$issue_title}";
+        $notification_subject = "[$site_name] {$issue_title}";
         $notification_message = "
         <html>
         <head><title>New Support Request</title></head>
@@ -85,8 +85,8 @@ if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
         
         $notification_headers = "MIME-Version: 1.0" . "\r\n";
         $notification_headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $notification_headers .= "From: {$site_name} <{$sender_email}>" . "\r\n";
-        $notification_headers .= "Reply-To: {$contact_email}" . "\r\n";
+        $notification_headers .= "From: {$contact_name} <{$sender_email}>" . "\r\n";
+        $notification_headers .= "Reply-To: {$contact_name} <{$contact_email}>" . "\r\n";
         
         $notification_sent = mail($support_email, $notification_subject, $notification_message, $notification_headers);
         if( $notification_sent ) {
