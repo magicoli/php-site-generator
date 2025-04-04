@@ -3,6 +3,9 @@
 $github_user = "{{github_user}}";
 $repo = "{{github_repo}}";
 $github_token = "{{github_token}}";
+$site_name = "{{title}}";
+$site_name = "OpenSim Helpers";
+$admin_email = "gudule@speculoos.world"; // Change to project maintainer's email
 
 // This page will be included in the main template, do not exit
 
@@ -14,12 +17,107 @@ $issue_title = trim($_POST['issue_title'] ?? '');
 $issue_description = trim($_POST['issue_description'] ?? '');
 $contact_email = trim($_POST['contact_email'] ?? '');
 $contact_name = trim($_POST['contact_name'] ?? '');
+$success = false;
+$errors = []; // Initialize errors array
 
-if (empty($issue_title) || empty($issue_description)) {
-    echo '<div class="alert alert-warning" role="alert">';
-    echo "This page is still under development, form will not be processed.";
-    echo '</div>';
-        // Display form with available field values if any
+# Process the form if submitted
+if( isset($_POST['submit']) && $_POST['submit'] == 'support_request' ) {
+    // Validate required fields
+    if (empty($issue_title)) {
+        $errors['issue_title'] = "Issue title is required";
+    }
+    if (empty($issue_description)) {
+        $errors['issue_description'] = "Issue description is required";
+    }
+    if (empty($contact_email)) {
+        $errors['contact_email'] = "Contact email is required";
+    } elseif (!filter_var($contact_email, FILTER_VALIDATE_EMAIL)) {
+        $errors['contact_email'] = "Invalid email format";
+    }
+    
+    // Process if no validation errors
+    if (empty($errors)) {
+        // Prepare email content
+        
+        // Send confirmation email to requester
+        $confirmation_subject = "Your support request was received - {$issue_title}";
+        $confirmation_message = "
+            <html>
+            <head><title>Support Request Confirmation</title></head>
+            <body>
+                <h2>Thank you for your support request</h2>
+                <p>We have received your support request with the following details:</p>
+                <p><strong>Title:</strong> {$issue_title}</p>
+                <p><strong>Description:</strong> {$issue_description}</p>
+                <p>We'll review your request and get back to you as soon as possible.</p>
+                <p>Best regards,<br>The {$site_name} Team</p>
+            </body>
+            </html>
+        ";
+        
+        $headers = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= "From: {$site_name} <{$admin_email}>" . "\r\n";
+
+        // Send notification to admin
+        $notification_subject = "[Support Request] {$issue_title}";
+        $notification_message = "
+        <html>
+        <head><title>New Support Request</title></head>
+        <body>
+        <h2>New Support Request Received</h2>
+        <p><strong>From:</strong> " . (!empty($contact_name) ? "{$contact_name} ({$contact_email})" : $contact_email) . "</p>
+        <p><strong>Title:</strong> {$issue_title}</p>
+        <p><strong>Description:</strong> {$issue_description}</p>
+        </body>
+        </html>
+        ";
+        
+        $notification_sent = mail($admin_email, $notification_subject, $notification_message, $headers);
+        if( $notification_sent ) {
+            $success = true;
+            $confirmation_sent = mail($contact_email, $confirmation_subject, $confirmation_message, $headers);
+            if( !$confirmation_sent ) {
+                $errors['contact_email'] = sprintf(
+                    'Confirmation mail to %s failed, but support has been notified.',
+                    htmlspecialchars($contact_email),
+                );
+            }
+        } else {
+            $errors['admin_email'] = sprintf(
+                'Mail could not be sent to support, your request could not be processed.',
+            );
+        }
+    }
+}
+
+if (!empty($errors)) {
+    echo '<div class="alert alert-danger" role="alert">';
+    echo '<strong>Errors:</strong><ul class="mb-0">';
+    foreach ($errors as $error) {
+        echo '<li>' . htmlspecialchars($error) . '</li>';
+    }
+    echo '</ul></div>';
+}
+
+# Display form if post empty or processing failed with error, otherwise only display success message
+if ($success) {
+    printf(
+        '<div class="alert alert-success" role="alert">
+            <strong>Success!</strong> Your issue has been submitted.
+            <p>(Actually, it was not processed, we are only simulating the success message)</p>
+            <ul class="mb-0">
+                <li>Contact: <a href="mailto:%s">%s</a></li>
+                <li>Title: %s</li>
+                <li>Description: %s</li>
+            </ul></div>',
+        htmlspecialchars($contact_email),
+        htmlspecialchars(empty($contact_name) ? $contact_email : $contact_name),
+        htmlspecialchars($issue_title),
+        htmlspecialchars($issue_description),
+    );
+} else {
+    // Display form with available field values if any
     $form = sprintf(
         '<form method="post">
             <div class="mb-3">
@@ -38,7 +136,7 @@ if (empty($issue_title) || empty($issue_description)) {
                 <label for="issue_description" class="form-label">Issue Description (required)</label>
                 <textarea class="form-control" id="issue_description" name="issue_description" rows="5" required>%s</textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Submit Issue</button>
+            <button type="submit" name="submit" value="support_request" class="btn btn-primary">Submit Issue</button>
         </form>',
         htmlspecialchars($contact_name),
         htmlspecialchars($contact_email),
@@ -46,25 +144,7 @@ if (empty($issue_title) || empty($issue_description)) {
         htmlspecialchars($issue_description),
     );
     echo $form;
-} else {
-    // Will process the form here and display the result instead of the form
-    // Not for now, we'll see that later.
-    printf(
-        '<div class="alert alert-success" role="alert">
-            <strong>Success!</strong> Your issue has been submitted.
-            <p>(Actually, it was not processed, we are only simulating the success message)</p>
-            <ul>
-                <li>Contact: <a href="mailto:%s">%s</a></li>
-                <li>Title: %s</li>
-                <li>Description: %s</li>
-            </ul></div>',
-        htmlspecialchars($contact_email),
-        htmlspecialchars(empty($contact_name) ? $contact_email : $contact_name),
-        htmlspecialchars($issue_title),
-        htmlspecialchars($issue_description),
-    );
 }
-
 
 ## Following is the Old proposal, likely to be removed, ignore it
 
