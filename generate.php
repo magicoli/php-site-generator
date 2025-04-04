@@ -84,7 +84,7 @@ foreach ($menu as $item) {
             $link = $m["file"] . ".html";
         }
         $active = ($m["file"] === $file) ? 'active strong' : '';
-        $menu_html .= "<li class='nav-item'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
+        $menu_html .= "<li class='nav-item $active'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
     }
 
     $output = render_page($title, $html, $menu_html);
@@ -109,3 +109,23 @@ $home_output = render_page("Accueil", $home, $menu_html);
 file_put_contents("$output_folder/index.html", $home_output);
 
 echo "Site généré dans $output_folder\n";
+
+// Recursively copy assets folder to output folder
+function recursive_copy($src, $dst) {
+    $dir = opendir($src);
+    if (!is_dir($dst)) {
+        mkdir($dst, 0777, true);
+    }
+    while(false !== ($file = readdir($dir))) {
+        if (($file != '.') && ($file != '..')) {
+            if (is_dir("$src/$file")) {
+                recursive_copy("$src/$file", "$dst/$file");
+            } else {
+                copy("$src/$file", "$dst/$file");
+            }
+        }
+    }
+    closedir($dir);
+}
+recursive_copy("assets", "$output_folder/assets");
+echo "Assets copied to $output_folder/assets\n";
