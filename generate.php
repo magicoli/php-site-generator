@@ -77,6 +77,40 @@ function fetch_latest_release($user, $repo) {
     return null;
 }
 
+// New function: fetch open issues from GitHub
+function fetch_issues($user, $repo) {
+    global $github_token;
+    $url = "https://api.github.com/repos/$user/$repo/issues?state=open";
+    $opts = [
+        "http" => [
+            "header" => "User-Agent: PHP\r\n"
+        ]
+    ];
+    if (!empty($github_token)) {
+        $opts['http']['header'] .= "Authorization: token $github_token\r\n";
+    }
+    $context = stream_context_create($opts);
+    $result = file_get_contents($url, false, $context);
+    if ($result !== false) {
+        $issues = json_decode($result, true);
+        $issues_markdown = "";
+        if (is_array($issues) && count($issues) > 0) {
+            foreach ($issues as $issue) {
+                // Exclude pull requests
+                if (isset($issue['pull_request'])) {
+                    continue;
+                }
+                $number = htmlspecialchars($issue['number']);
+                $title = htmlspecialchars($issue['title']);
+                $issue_url = htmlspecialchars($issue['html_url']);
+                $issues_markdown .= "- [#$number $title]($issue_url)\n";
+            }
+            return $issues_markdown;
+        }
+    }
+    return "No open issues found.";
+}
+
 function render_page($title, $content, $menu_html) {
     // Make $site_title, $github_user and $repo available in the template
     global $site_title, $github_user, $repo;
@@ -132,6 +166,23 @@ foreach ($menu as $item) {
             
             // Convert the Markdown template to HTML
             $html = $parsedown->text($template);
+        } elseif ($file === "issues") {
+            // Fetch open issues from GitHub
+            $issues_content = fetch_issues($github_user, $repo);
+            // Load the Markdown template for the issues page
+            $template = file_get_contents("pages/issues.md");
+            $template = str_replace("{{issues_content}}", $issues_content, $template);
+            $template = str_replace("{{github_user}}", htmlspecialchars($github_user), $template);
+            $template = str_replace("{{repo}}", htmlspecialchars($repo), $template);
+            // Replace the issue form placeholder with a marker that will later be replaced by the PHP include.
+            // $template = str_replace("{{issue_form}}", "{{issue_form_marker}}", $template);
+            // Process the markdown
+            $html = $parsedown->text($template);
+            // Replace the marker with the desired PHP include code (avoid HTML-escaped PHP tags)
+            $html = str_replace("{{issue_form}}", "<?php include('issue_form.php'); ?>", $html);
+            // Set output filename as PHP
+            $slug = "issues";
+            $ext = ".php";
         } else {
             $html = "<p>Special page: <strong>$file</strong> (to be implemented)</p>";
         }
@@ -143,6 +194,8 @@ foreach ($menu as $item) {
         if (stripos($m["file"], ".md") !== false) {
             $menu_slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
             $link = $menu_slug . ".html";
+        } else if ( 'issues' === $m["file"] ) {
+            $link = $m["file"] . ".php";
         } else {
             $link = $m["file"] . ".html";
         }
@@ -150,8 +203,9 @@ foreach ($menu as $item) {
         $menu_html .= "<li class='nav-item $active'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
     }
 
+    $output_filename = ($file === "issues") ? "$output_folder/{$slug}.php" : "$output_folder/{$slug}.html";
     $output = render_page($title, $html, $menu_html);
-    file_put_contents("$output_folder/{$slug}.html", $output);
+    file_put_contents($output_filename, $output);
 }
 
 // Generate homepage from README.md
@@ -190,5 +244,16 @@ function recursive_copy($src, $dst) {
     }
     closedir($dir);
 }
+
 recursive_copy("assets", "$output_folder/assets");
 echo "Assets copied to $output_folder/assets\n";
+
+// NEW: Generate parsed issue_form.php in the output folder using the template from pages/partials/issue_form.php
+$issueFormTemplate = file_get_contents("pages/partials/issue_form.php");
+$issueFormContent = str_replace(
+    ['{{github_user}}', '{{github_repo}}', '{{github_token}}'],
+    [htmlspecialchars($github_user), htmlspecialchars($repo), htmlspecialchars($github_token)],
+    $issueFormTemplate
+);
+file_put_contents("$output_folder/issue_form.php", $issueFormContent);
+echo "issue_form.php generated in $output_folder\n";
