@@ -52,6 +52,17 @@ cp config.json.example config.json
 php generate.php
 ```
 
+6. Set up a cron task to automatically update your site:
+```bash
+# Edit crontab
+crontab -e
+
+# Add a line to run the generator hourly (adjust the path as needed)
+0 * * * * cd /home/path/to/php-site-generator && php generate.php >> /var/log/site-generator.log 2>&1
+```
+
+The cron task will automatically rebuild your site on a regular schedule, keeping the content in sync with your GitHub repository.
+
 ## Configuration
 
 Edit `config.json` to configure your site:
