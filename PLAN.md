@@ -15,7 +15,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 - [x] Home page generated from `README.md`
 - [x] Additional Markdown pages (e.g., `INSTALLATION.md`, `TROUBLESHOOTING.md`)
 - [x] Downloads page (fetch GitHub Releases info)
-- [ ] Issues page (fetch GitHub Issues data; to be implemented)
+- [ ] Support page (fetch GitHub Support data; to be implemented)
 - [ ] Donations page with Stripe / PayPal integration (to be implemented)
 
 ## Structure
@@ -57,7 +57,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
     { "title": "Installation", "file": "INSTALLATION.md" },
     { "title": "Troubleshooting", "file": "TROUBLESHOOTING.md" },
     { "title": "Downloads", "file": "downloads" },
-    { "title": "Issues", "file": "issues" },
+    { "title": "Support", "file": "issues" },
     { "title": "Donate", "file": "donate" }
   ]
 }
@@ -70,7 +70,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 3. Convert Markdown to HTML using Parsedown.
 4. Inject content into a common HTML template (`template.php`).
 5. Dynamically generate navigation menus.
-6. Generate special pages (Downloads, Issues, Donate) as placeholders or with API data.
+6. Generate special pages (Downloads, Support, Donate) as placeholders or with API data.
 7. Copy assets to the output folder.
 8. Save all pages in the specified output folder.
 
@@ -82,7 +82,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 - [x] Generate dynamic navigation menus.
 - Implement special pages
   - [x] Downloads
-  - [ ] Issues
+  - [ ] Support
   - [ ] Donate
 - [ ] Enable minimal customization options
   - [ ] favicon
