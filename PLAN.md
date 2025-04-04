@@ -14,7 +14,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 
 - [x] Home page generated from `README.md`
 - [x] Additional Markdown pages (e.g., `INSTALLATION.md`, `TROUBLESHOOTING.md`)
-- [ ] Downloads page (fetch GitHub Releases info; to be implemented)
+- [x] Downloads page (fetch GitHub Releases info)
 - [ ] Issues page (fetch GitHub Issues data; to be implemented)
 - [ ] Donations page with Stripe / PayPal integration (to be implemented)
 
@@ -81,7 +81,7 @@ Generate a static site based on a GitHub repository containing a PHP library, wi
 - [x] Create a responsive HTML template in `template.php`.
 - [x] Generate dynamic navigation menus.
 - Implement special pages
-  - [ ] Downloads
+  - [x] Downloads
   - [ ] Issues
   - [ ] Donate
 - [ ] Enable minimal customization options

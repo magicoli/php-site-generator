@@ -53,6 +53,30 @@ function fetch_markdown($user, $repo, $file) {
     return "";
 }
 
+// New function: fetch latest stable release from GitHub
+function fetch_latest_release($user, $repo) {
+    global $github_token;
+    $url = "https://api.github.com/repos/$user/$repo/releases/latest";
+    $opts = [
+        "http" => [
+            "header" => "User-Agent: PHP\r\n"
+        ]
+    ];
+    if (!empty($github_token)) {
+        $opts['http']['header'] .= "Authorization: token $github_token\r\n";
+    }
+    $context = stream_context_create($opts);
+    $result = file_get_contents($url, false, $context);
+    if ($result !== false) {
+        $release = json_decode($result, true);
+        // Ensure it's a stable release
+        if (isset($release['prerelease']) && $release['prerelease'] === false) {
+            return $release;
+        }
+    }
+    return null;
+}
+
 function render_page($title, $content, $menu_html) {
     // Make $site_title, $github_user and $repo available in the template
     global $site_title, $github_user, $repo;
@@ -71,7 +95,46 @@ foreach ($menu as $item) {
         $md = fetch_markdown($github_user, $repo, $file);
         $html = $parsedown->text($md); // Convert Markdown to HTML
     } else {
-        $html = "<p>Special page: <strong>$file</strong> (to be implemented)</p>";
+        if ($file === "downloads") {
+            // Fetch latest stable release data
+            $release = fetch_latest_release($github_user, $repo);
+            // Load the Markdown template for the downloads page
+            $template = file_get_contents("pages/downloads.md");
+            
+            if ($release) {
+                $version = htmlspecialchars($release['tag_name']);
+                $version = ltrim($version, 'v'); // Remove leading 'v' if present
+                if (isset($release['assets']) && count($release['assets']) > 0) {
+                    $download_link = htmlspecialchars($release['assets'][0]['browser_download_url']);
+                } else {
+                    $download_link = htmlspecialchars($release['zipball_url'] ?? $release['tarball_url'] ?? '');
+                }
+                $release_date = date("F j, Y", strtotime($release['published_at'] ?? ''));
+                $release_notes = nl2br(htmlspecialchars($release['body'] ?? 'No details available.'));
+                // Generate the download button HTML code
+                $download_button = '<a href="' . $download_link . '" class="btn btn-primary" target="_blank">Download ' . $version . '</a>';
+            } else {
+                $version = "N/A";
+                $download_link = "#";
+                $release_date = "N/A";
+                $release_notes = "No stable release found.";
+                $download_button = "";
+            }
+            
+            // Replace placeholders in the Markdown template
+            $template = str_replace("{{version}}", $version, $template);
+            $template = str_replace("{{release_date}}", $release_date, $template);
+            $template = str_replace("{{release_notes}}", $release_notes, $template);
+            $template = str_replace("{{download_link}}", $download_link, $template);
+            $template = str_replace("{{download_button}}", $download_button, $template);
+            $template = str_replace("{{github_user}}", htmlspecialchars($github_user), $template);
+            $template = str_replace("{{repo}}", htmlspecialchars($repo), $template);
+            
+            // Convert the Markdown template to HTML
+            $html = $parsedown->text($template);
+        } else {
+            $html = "<p>Special page: <strong>$file</strong> (to be implemented)</p>";
+        }
     }
 
     // Build friendly menu with active highlighting
