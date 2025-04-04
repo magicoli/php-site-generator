@@ -4,6 +4,8 @@ require_once "vendor/autoload.php"; // load full Parsedown via Composer
 $config = json_decode(file_get_contents("config.json"), true);
 $parsedown = new Parsedown();
 
+$site_title = $config["title"] ?? "Site";
+
 $github_user = $config["github_user"];
 $repo = $config["repo"];
 
@@ -52,6 +54,8 @@ function fetch_markdown($user, $repo, $file) {
 }
 
 function render_page($title, $content, $menu_html) {
+    // Make $site_title, $github_user and $repo available in the template
+    global $site_title, $github_user, $repo;
     ob_start();
     include "template.php";
     return ob_get_clean();
@@ -69,9 +73,17 @@ foreach ($menu as $item) {
         $html = "<p>Page spéciale : <strong>$file</strong> (à implémenter)</p>";
     }
 
+    // Build friendly menu with active highlighting
     $menu_html = "";
     foreach ($menu as $m) {
-        $menu_html .= "<li><a href='{$m["file"]}.html'>{$m["title"]}</a></li>";
+        if (stripos($m["file"], ".md") !== false) {
+            $slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
+            $link = $slug . ".html";
+        } else {
+            $link = $m["file"] . ".html";
+        }
+        $active = ($m["file"] === $file) ? 'active' : '';
+        $menu_html .= "<li class='nav-item'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
     }
 
     $output = render_page($title, $html, $menu_html);
@@ -83,7 +95,14 @@ $readme = fetch_markdown($github_user, $repo, "README.md");
 $home = $parsedown->text($readme); // Convert Markdown to HTML
 $menu_html = ""; // Ensure menu_html is defined for the homepage
 foreach ($menu as $m) {
-    $menu_html .= "<li><a href='{$m["file"]}.html'>{$m["title"]}</a></li>";
+    if (stripos($m["file"], ".md") !== false) {
+        $slug = strtolower(pathinfo($m["file"], PATHINFO_FILENAME));
+        $link = $slug . ".html";
+    } else {
+        $link = $m["file"] . ".html";
+    }
+    // No active item for homepage
+    $menu_html .= "<li class='nav-item'><a class='nav-link' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
 }
 $home_output = render_page("Accueil", $home, $menu_html);
 file_put_contents("$output_folder/index.html", $home_output);
