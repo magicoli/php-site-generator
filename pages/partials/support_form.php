@@ -9,6 +9,15 @@ $sender_email = "{{sender_email}}";
 
 // This page will be included in the main template, do not exit
 
+// Check if support email is configured
+if ( empty($support_email) ) {
+    echo '<div class="alert alert-secondary" role="alert">
+        Support form is not enabled. 
+    </div>';
+    // Exit early - don't process or display the form
+    return;
+}
+
 // if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 //     die("Invalid request method.");
 // }

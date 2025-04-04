@@ -12,7 +12,8 @@ if (empty($github_user) || empty($repo)) {
     die( "Error: GitHub user or repo not set in config.json.\n");
 }
 
-$site_title = $config["title"] ?? "Site";
+// Get domain name for fallback site title
+$site_title =  $config["title"] ?? $repo ?? 'GitHub Project';
 $menu = $config["menu"];
 $support_email = $config["support_email"] ?? null;
 $sender_email = $config["sender_email"] ?? $config["support_email"] ?? null;
@@ -26,6 +27,10 @@ $output_folder = rtrim($output_folder, "/"); // Remove trailing slash if present
 # Exit with error if output folder is not writable
 if (!is_writable($output_folder)) {
     die( "Error: Output folder '$output_folder' does not exist or is not writable.\n");
+}
+
+if (empty($support_email)) {
+    error_log( "Error: support_email is not set in config.json, support form is disabled.");
 }
 
 function fetch_markdown($user, $repo, $file) {
