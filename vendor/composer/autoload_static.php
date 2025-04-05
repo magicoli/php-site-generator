@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInite09b7c3d741c63a2bc9c3e6b90bbfc0c
 {
     public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'ScssPhp\\ScssPhp\\' => 16,
+        ),
         'M' => 
         array (
             'Magicoli\\PhpSiteGenerator\\' => 26,
@@ -14,6 +18,10 @@ class ComposerStaticInite09b7c3d741c63a2bc9c3e6b90bbfc0c
     );
 
     public static $prefixDirsPsr4 = array (
+        'ScssPhp\\ScssPhp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/scssphp/scssphp/src',
+        ),
         'Magicoli\\PhpSiteGenerator\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
