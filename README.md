@@ -15,7 +15,7 @@ This tool automatically generates a static website based on your GitHub reposito
   - List of open GitHub issues
   - Contact form with email notifications
 - [x] Code syntax highlighting with highlight.js
-- [ ] Donations page with payment integration (planned)
+- [ ] Sponsor page with payment integration (planned)
 
 ### Future Plans
 

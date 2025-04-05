@@ -119,6 +119,199 @@ function fetch_issues($user, $repo) {
     return "No open issues found.";
 }
 
+// New function: fetch GitHub funding info from FUNDING.yml
+function fetch_funding_info($user, $repo) {
+    global $github_token;
+    
+    // Try to get the FUNDING.yml file from the .github directory
+    $funding_path = ".github/FUNDING.yml";
+    $url = "https://api.github.com/repos/$user/$repo/contents/$funding_path";
+    
+    $opts = [
+        "http" => [
+            "header" => "User-Agent: PHP\r\n"
+        ]
+    ];
+    
+    if (!empty($github_token)) {
+        $opts['http']['header'] .= "Authorization: token $github_token\r\n";
+    }
+    
+    $context = stream_context_create($opts);
+    $result = file_get_contents($url, false, $context);
+    
+    if ($result === false) {
+        return null;
+    }
+    
+    $data = json_decode($result, true);
+    if (!isset($data['content']) || $data['encoding'] !== 'base64') {
+        return null;
+    }
+    
+    $content = base64_decode($data['content']);
+    return parse_funding_yaml($content);
+}
+
+// New function: Parse YAML funding file to extract sponsorship links
+function parse_funding_yaml($yaml_content) {
+    $funding_links = [];
+    $lines = explode("\n", $yaml_content);
+    
+    foreach ($lines as $line) {
+        // Skip comments and empty lines
+        if (empty(trim($line)) || strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        
+        // Match platform: value format
+        if (preg_match('/^([a-zA-Z_]+):\s*(.+)$/', $line, $matches)) {
+            $platform = trim($matches[1]);
+            $value = trim($matches[2]);
+            
+            // Skip empty values or placeholders
+            if (empty($value) || $value === '#' || strpos($value, '# Replace with') !== false) {
+                continue;
+            }
+            
+            $funding_links[$platform] = $value;
+        }
+    }
+    
+    return $funding_links;
+}
+
+// New function: Validate GitHub sponsors profile
+function validate_github_sponsor($username) {
+    $url = "https://github.com/sponsors/$username";
+    $opts = [
+        "http" => [
+            "method" => "HEAD",
+            "header" => "User-Agent: PHP\r\n",
+            "follow_location" => 0,  // Don't follow redirects
+            "ignore_errors" => true, // Get response even if it's an error
+        ]
+    ];
+    
+    $context = stream_context_create($opts);
+    $headers = get_headers($url, 1, $context);
+    
+    // Check if the page exists and doesn't redirect to a 404 or other error page
+    // GitHub returns 200 for sponsors page that exists, or redirects to 404 for non-existent ones
+    if (isset($headers[0]) && strpos($headers[0], '200') !== false) {
+        // Additional check to ensure the sponsors page has active tiers
+        $page_content = file_get_contents($url, false, stream_context_create([
+            "http" => ["header" => "User-Agent: PHP\r\n"]
+        ]));
+        
+        // Look for indicators that sponsorship is enabled
+        // These strings appear in active sponsor pages but not in profiles without sponsorship
+        return (
+            strpos($page_content, 'tier-') !== false || 
+            strpos($page_content, 'Sponsor this') !== false ||
+            strpos($page_content, 'sponsor-tier') !== false
+        );
+    }
+    
+    return false;
+}
+
+// New function: Generate HTML for sponsor links
+function generate_sponsor_links($funding_info) {
+    if (empty($funding_info)) {
+        return null;
+    }
+    
+    $html = '<div class="sponsor-links">';
+    
+    foreach ($funding_info as $platform => $value) {
+        $url = '';
+        $button_text = ucfirst($platform);
+        $button_class = 'btn btn-primary mb-2 me-2';
+        $icon = '';
+        $is_valid = true;
+        
+        switch ($platform) {
+            case 'github':
+                // Validate GitHub sponsors profile before adding it
+                if (validate_github_sponsor($value)) {
+                    $url = "https://github.com/sponsors/$value";
+                    $button_text = "GitHub Sponsors";
+                    $icon = '<i class="fab fa-github"></i> ';
+                } else {
+                    // Skip this entry if GitHub sponsor profile is not valid
+                    $is_valid = false;
+                    echo "GitHub sponsor profile for '$value' is not valid or active, skipping.\n";
+                }
+                break;
+            case 'patreon':
+                $url = "https://www.patreon.com/$value";
+                $icon = '<i class="fab fa-patreon"></i> ';
+                break;
+            case 'open_collective':
+                $url = "https://opencollective.com/$value";
+                $button_text = "Open Collective";
+                $icon = '<i class="fa fa-circle"></i> ';
+                break;
+            case 'ko_fi':
+                $url = "https://ko-fi.com/$value";
+                $button_text = "Ko-fi";
+                $icon = '<i class="fa fa-coffee"></i> ';
+                break;
+            case 'tidelift':
+                $url = "https://tidelift.com/funding/github/$value";
+                $icon = '<i class="fa fa-life-ring"></i> ';
+                break;
+            case 'community_bridge':
+                $url = "https://funding.communitybridge.org/projects/$value";
+                $button_text = "Community Bridge";
+                $icon = '<i class="fa fa-bridge"></i> ';
+                break;
+            case 'liberapay':
+                $url = "https://liberapay.com/$value";
+                $icon = '<i class="fa fa-hand-holding-heart"></i> ';
+                break;
+            case 'issuehunt':
+                $url = "https://issuehunt.io/r/$value";
+                $icon = '<i class="fa fa-bug"></i> ';
+                break;
+            case 'lfx_crowdfunding':
+                $url = "https://funding.communitybridge.org/projects/$value";
+                $button_text = "LFX Crowdfunding";
+                $icon = '<i class="fa fa-hand-holding-usd"></i> ';
+                break;
+            case 'buy_me_a_coffee':
+                $url = "https://www.buymeacoffee.com/$value";
+                $button_text = "Buy Me A Coffee";
+                $icon = '<i class="fa fa-coffee"></i> ';
+                break;
+            case 'custom':
+                $url = $value;
+                $button_text = "Donate";
+                $icon = '<i class="fa fa-heart"></i> ';
+                break;
+            default:
+                if (filter_var($value, FILTER_VALIDATE_URL)) {
+                    $url = $value;
+                }
+                break;
+        }
+        
+        if (!empty($url) && $is_valid) {
+            $html .= "<a href=\"$url\" class=\"$button_class\" target=\"_blank\" rel=\"noopener\">$icon$button_text</a>\n";
+        }
+    }
+    
+    $html .= '</div>';
+    
+    // If no valid sponsor links were found, return null
+    if ($html === '<div class="sponsor-links"></div>') {
+        return null;
+    }
+    
+    return $html;
+}
+
 function render_page($title, $content, $menu_html) {
     // Make $site_title, $github_user and $repo available in the template
     global $site_title, $github_user, $repo;
@@ -147,7 +340,36 @@ function build_menu_html($menu, $file = "", $slug = "") {
     return $menu_html;
 }
 
-foreach ($menu as $item) {
+// First, pre-process the sponsor page to determine if we should include it in the menu
+foreach ($menu as $key => $item) {
+    if ($item["file"] === "sponsor") {
+        // Process sponsor page
+        $funding_info = fetch_funding_info($github_user, $repo);
+        
+        // Skip this page if no funding info is found
+        if (empty($funding_info)) {
+            echo "No sponsor information found, skipping sponsor page generation.\n";
+            unset($menu[$key]); // Remove from menu
+            continue;
+        }
+        
+        // Generate sponsor links HTML
+        $sponsor_links_html = generate_sponsor_links($funding_info);
+        
+        // Skip this page if no valid sponsor links are found
+        if (empty($sponsor_links_html)) {
+            echo "No valid sponsor links found, skipping sponsor page generation.\n";
+            unset($menu[$key]); // Remove from menu
+            continue;
+        }
+        
+        // Store the sponsor links HTML for later use
+        $GLOBALS['sponsor_links_html'] = $sponsor_links_html;
+    }
+}
+
+// Now process all menu items to generate pages
+foreach ($menu as $key => $item) {
     $file = $item["file"];
     $slug = strtolower(pathinfo($file, PATHINFO_FILENAME));
     $title = $item["title"];
@@ -211,6 +433,17 @@ foreach ($menu as $item) {
             // Set output filename as PHP
             $slug = "support";
             $ext = ".php";
+        } elseif ($file === "sponsor") {
+            // We already verified this page should be included, so generate it
+            $template = file_get_contents("pages/sponsor.md");
+            
+            // Replace placeholders in the sponsor template
+            $template = str_replace("{{sponsor_links}}", $GLOBALS['sponsor_links_html'], $template);
+            $template = str_replace("{{github_user}}", htmlspecialchars($github_user), $template);
+            $template = str_replace("{{repo}}", htmlspecialchars($repo), $template);
+            
+            // Convert the Markdown template to HTML
+            $html = $parsedown->text($template);
         } else {
             $html = "<p>Special page: <strong>$file</strong> (to be implemented)</p>";
         }
