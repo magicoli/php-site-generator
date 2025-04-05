@@ -260,7 +260,7 @@ function generate_sponsor_links($funding_info) {
                     $url = "https://github.com/sponsors/$value";
                     $button_text = "GitHub Sponsors";
                     $icon = '<i class="fab fa-github me-2"></i>';
-                    $button_class = 'btn mb-2 me-2 shadow-sm'; // No btn-primary, custom color in CSS
+                    // $button_class = 'btn mb-2 me-2 shadow-sm'; // No btn-primary, custom color in CSS
                 } else {
                     // Skip this entry if GitHub sponsor profile is not valid
                     $is_valid = false;
@@ -270,26 +270,21 @@ function generate_sponsor_links($funding_info) {
             case 'patreon':
                 $url = "https://www.patreon.com/$value";
                 $icon = '<i class="fab fa-patreon me-2"></i>';
-                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'open_collective':
                 $url = "https://opencollective.com/$value";
                 $button_text = "Open Collective";
-                // Use a custom SVG icon for Open Collective
                 $icon = '<img src="assets/opencollective-icon.svg" alt="Open Collective" class="icon me-2" style="width: 1em; height: 1em;" />';
-                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'ko_fi':
                 $url = "https://ko-fi.com/$value";
                 $button_text = "Ko-fi";
                 $icon = '<i class="fa fa-coffee me-2"></i>';
-                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'buy_me_a_coffee':
                 $url = "https://www.buymeacoffee.com/$value";
                 $button_text = "Buy Me A Coffee";
                 $icon = '<i class="fa fa-coffee me-2"></i>';
-                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'tidelift':
                 $url = "https://tidelift.com/funding/github/$value";
@@ -334,7 +329,6 @@ function generate_sponsor_links($funding_info) {
                     $button_text = ucfirst($domain);
                 }
                 
-                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom style
                 break;
             default:
                 if (filter_var($value, FILTER_VALIDATE_URL)) {
