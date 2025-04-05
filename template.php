@@ -56,7 +56,7 @@
           </ul>
         </div>
       </nav>
-      <main class="col-lg-9 p-3">
+      <main class="col-xxl-6 col-lg-9 p-3">
         <?= $content ?>
       </main>
     </div>
