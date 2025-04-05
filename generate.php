@@ -219,6 +219,25 @@ function validate_github_sponsor($username) {
     return false;
 }
 
+// Helper function to get favicon for a URL
+function get_favicon_url($url) {
+    // Parse the URL to get the domain
+    $parsed_url = parse_url($url);
+    if (!isset($parsed_url['host'])) {
+        return null;
+    }
+    
+    $domain = $parsed_url['host'];
+    
+    // Try Google's favicon service first (most reliable)
+    $favicon_url = "https://www.google.com/s2/favicons?domain=$domain&sz=32";
+    
+    // Optional: You could try to fetch the direct favicon from the site
+    // but Google's service is generally more reliable
+    
+    return $favicon_url;
+}
+
 // New function: Generate HTML for sponsor links
 function generate_sponsor_links($funding_info) {
     if (empty($funding_info)) {
@@ -297,7 +316,25 @@ function generate_sponsor_links($funding_info) {
             case 'custom':
                 $url = $value;
                 $button_text = "Donate";
-                $icon = '<i class="fa fa-heart me-2"></i>';
+                
+                // Get favicon for custom URL
+                $favicon_url = get_favicon_url($url);
+                if ($favicon_url) {
+                    $icon = "<img src=\"$favicon_url\" alt=\"Favicon\" class=\"icon me-2\" style=\"width: 1em; height: 1em;\" />";
+                } else {
+                    $icon = '<i class="fa fa-heart me-2"></i>';
+                }
+                
+                // Extract domain name for the button text
+                $parsed_url = parse_url($url);
+                if (isset($parsed_url['host'])) {
+                    $domain = $parsed_url['host'];
+                    // Remove www. prefix if present
+                    $domain = preg_replace('/^www\./', '', $domain);
+                    $button_text = ucfirst($domain);
+                }
+                
+                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom style
                 break;
             default:
                 if (filter_var($value, FILTER_VALIDATE_URL)) {
