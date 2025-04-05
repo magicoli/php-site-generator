@@ -1,6 +1,9 @@
 <?php
 require_once "vendor/autoload.php"; // load full Parsedown via Composer
 
+// Import the SCSS compiler
+use ScssPhp\ScssPhp\Compiler;
+
 $config = json_decode(file_get_contents("config.json"), true);
 $parsedown = new Parsedown();
 
@@ -222,12 +225,12 @@ function generate_sponsor_links($funding_info) {
         return null;
     }
     
-    $html = '<div class="sponsor-links">';
+    $html = '<div class="sponsor-links d-flex flex-wrap gap-2 my-4">';
     
     foreach ($funding_info as $platform => $value) {
         $url = '';
         $button_text = ucfirst($platform);
-        $button_class = 'btn btn-primary mb-2 me-2';
+        $button_class = 'btn btn-secondary mb-2 me-2 shadow-sm';
         $icon = '';
         $is_valid = true;
         
@@ -237,7 +240,8 @@ function generate_sponsor_links($funding_info) {
                 if (validate_github_sponsor($value)) {
                     $url = "https://github.com/sponsors/$value";
                     $button_text = "GitHub Sponsors";
-                    $icon = '<i class="fab fa-github"></i> ';
+                    $icon = '<i class="fab fa-github me-2"></i>';
+                    $button_class = 'btn mb-2 me-2 shadow-sm'; // No btn-primary, custom color in CSS
                 } else {
                     // Skip this entry if GitHub sponsor profile is not valid
                     $is_valid = false;
@@ -246,49 +250,54 @@ function generate_sponsor_links($funding_info) {
                 break;
             case 'patreon':
                 $url = "https://www.patreon.com/$value";
-                $icon = '<i class="fab fa-patreon"></i> ';
+                $icon = '<i class="fab fa-patreon me-2"></i>';
+                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'open_collective':
                 $url = "https://opencollective.com/$value";
                 $button_text = "Open Collective";
-                $icon = '<i class="fa fa-circle"></i> ';
+                // Use a custom SVG icon for Open Collective
+                $icon = '<img src="assets/opencollective-icon.svg" alt="Open Collective" class="icon me-2" style="width: 1em; height: 1em;" />';
+                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'ko_fi':
                 $url = "https://ko-fi.com/$value";
                 $button_text = "Ko-fi";
-                $icon = '<i class="fa fa-coffee"></i> ';
-                break;
-            case 'tidelift':
-                $url = "https://tidelift.com/funding/github/$value";
-                $icon = '<i class="fa fa-life-ring"></i> ';
-                break;
-            case 'community_bridge':
-                $url = "https://funding.communitybridge.org/projects/$value";
-                $button_text = "Community Bridge";
-                $icon = '<i class="fa fa-bridge"></i> ';
-                break;
-            case 'liberapay':
-                $url = "https://liberapay.com/$value";
-                $icon = '<i class="fa fa-hand-holding-heart"></i> ';
-                break;
-            case 'issuehunt':
-                $url = "https://issuehunt.io/r/$value";
-                $icon = '<i class="fa fa-bug"></i> ';
-                break;
-            case 'lfx_crowdfunding':
-                $url = "https://funding.communitybridge.org/projects/$value";
-                $button_text = "LFX Crowdfunding";
-                $icon = '<i class="fa fa-hand-holding-usd"></i> ';
+                $icon = '<i class="fa fa-coffee me-2"></i>';
+                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
                 break;
             case 'buy_me_a_coffee':
                 $url = "https://www.buymeacoffee.com/$value";
                 $button_text = "Buy Me A Coffee";
-                $icon = '<i class="fa fa-coffee"></i> ';
+                $icon = '<i class="fa fa-coffee me-2"></i>';
+                $button_class = 'btn mb-2 me-2 shadow-sm'; // Custom color in CSS
+                break;
+            case 'tidelift':
+                $url = "https://tidelift.com/funding/github/$value";
+                $icon = '<i class="fa fa-life-ring me-2"></i>';
+                break;
+            case 'community_bridge':
+                $url = "https://funding.communitybridge.org/projects/$value";
+                $button_text = "Community Bridge";
+                $icon = '<i class="fa fa-bridge me-2"></i>';
+                break;
+            case 'liberapay':
+                $url = "https://liberapay.com/$value";
+                $icon = '<i class="fa fa-hand-holding-heart me-2"></i>';
+                break;
+            case 'issuehunt':
+                $url = "https://issuehunt.io/r/$value";
+                $icon = '<i class="fa fa-bug me-2"></i>';
+                break;
+            case 'lfx_crowdfunding':
+                $url = "https://funding.communitybridge.org/projects/$value";
+                $button_text = "LFX Crowdfunding";
+                $icon = '<i class="fa fa-hand-holding-usd me-2"></i>';
                 break;
             case 'custom':
                 $url = $value;
                 $button_text = "Donate";
-                $icon = '<i class="fa fa-heart"></i> ';
+                $icon = '<i class="fa fa-heart me-2"></i>';
                 break;
             default:
                 if (filter_var($value, FILTER_VALIDATE_URL)) {
@@ -298,14 +307,16 @@ function generate_sponsor_links($funding_info) {
         }
         
         if (!empty($url) && $is_valid) {
-            $html .= "<a href=\"$url\" class=\"$button_class\" target=\"_blank\" rel=\"noopener\">$icon$button_text</a>\n";
+            $html .= "<a href=\"$url\" class=\"$button_class d-inline-flex align-items-center justify-content-center px-3 py-2 rounded\" 
+                      style=\"min-width: 180px;\" 
+                      target=\"_blank\" rel=\"noopener\">$icon$button_text</a>\n";
         }
     }
     
     $html .= '</div>';
     
     // If no valid sponsor links were found, return null
-    if ($html === '<div class="sponsor-links"></div>') {
+    if ($html === '<div class="sponsor-links d-flex flex-wrap gap-2 my-4"></div>') {
         return null;
     }
     
@@ -338,6 +349,53 @@ function build_menu_html($menu, $file = "", $slug = "") {
         $menu_html .= "<li class='nav-item $active'><a class='nav-link $active' href='{$link}'>" . htmlspecialchars($m["title"]) . "</a></li>";
     }
     return $menu_html;
+}
+
+// Compile a single SCSS file to CSS
+function compile_scss_file($scss_file, $css_file) {
+    try {
+        $scss_content = file_get_contents($scss_file);
+        
+        $compiler = new Compiler();
+        $compiler->setOutputStyle(\ScssPhp\ScssPhp\OutputStyle::COMPRESSED);
+        
+        $css = $compiler->compileString($scss_content)->getCss();
+        
+        file_put_contents($css_file, $css);
+        echo "Compiled $scss_file to $css_file\n";
+        return true;
+    } catch (Exception $e) {
+        echo "Error compiling SCSS: " . $e->getMessage() . "\n";
+        return false;
+    }
+}
+
+// Recursively copy assets folder to output folder
+function recursive_copy($src, $dst) {
+    $dir = opendir($src);
+    if (!is_dir($dst)) {
+        mkdir($dst, 0777, true);
+    }
+    while(false !== ($file = readdir($dir))) {
+        if (($file != '.') && ($file != '..')) {
+            if (is_dir("$src/$file")) {
+                recursive_copy("$src/$file", "$dst/$file");
+            } else {
+                // Check if this is an SCSS file
+                if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'scss') {
+                    // Convert SCSS to CSS in the destination directory
+                    $scss_file = "$src/$file";
+                    $css_name = basename($file, '.scss') . '.css';
+                    $css_file = "$dst/$css_name";
+                    compile_scss_file($scss_file, $css_file);
+                } else {
+                    // For non-SCSS files, simply copy them
+                    copy("$src/$file", "$dst/$file");
+                }
+            }
+        }
+    }
+    closedir($dir);
 }
 
 // First, pre-process the sponsor page to determine if we should include it in the menu
@@ -465,24 +523,6 @@ file_put_contents("$output_folder/index.html", $home_output);
 
 echo "Site generated in $output_folder\n";
 
-// Recursively copy assets folder to output folder
-function recursive_copy($src, $dst) {
-    $dir = opendir($src);
-    if (!is_dir($dst)) {
-        mkdir($dst, 0777, true);
-    }
-    while(false !== ($file = readdir($dir))) {
-        if (($file != '.') && ($file != '..')) {
-            if (is_dir("$src/$file")) {
-                recursive_copy("$src/$file", "$dst/$file");
-            } else {
-                copy("$src/$file", "$dst/$file");
-            }
-        }
-    }
-    closedir($dir);
-}
-
 recursive_copy("assets", "$output_folder/assets");
 echo "Assets copied to $output_folder/assets\n";
 
@@ -502,3 +542,4 @@ $issueFormContent = str_replace(
 );
 file_put_contents("$output_folder/support_form.php", $issueFormContent);
 echo "support_form.php generated in $output_folder\n";
+

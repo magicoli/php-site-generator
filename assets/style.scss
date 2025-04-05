@@ -1,0 +1,38 @@
+// Sponsor buttons styling
+.sponsor-links {
+  a {
+    background-color: lightgrey;
+    color: #000000;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    // Platform-specific styling
+    &[href*="github.com"] {
+      background-color: #24292e;
+      color: white;
+    }
+    
+    &[href*="patreon.com"] {
+      background-color: #F96854;
+      color: white;
+    }
+    
+    &[href*="opencollective.com"] {
+      background-color: #62a1ff;
+      color: white;
+    }
+    
+    &[href*="ko-fi.com"] {
+      background-color: #29ABE0;
+      color: white;
+    }
+    
+    &[href*="buymeacoffee.com"] {
+      background-color: #FFDD00;
+    }
+  }
+}
