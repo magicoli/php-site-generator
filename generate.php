@@ -7,8 +7,8 @@ use ScssPhp\ScssPhp\Compiler;
 $config = json_decode(file_get_contents("config.json"), true);
 $parsedown = new Parsedown();
 
-$github_user = $config["github_user"];
-$repo = $config["repo"];
+$github_user = $config["github_user"] ?? null;
+$repo = $config["repo"] ?? null;
 
 # Exit if GitHub user or repo is not set
 if (empty($github_user) || empty($repo)) {
@@ -58,7 +58,7 @@ function fetch_markdown($user, $repo, $file) {
         }
     } else {
         // Use raw URL if no token is set
-        $url = "https://raw.githubusercontent.com/$user/$repo/refs/heads/master/$file";
+        $url = "https://raw.githubusercontent.com/$user/$repo/refs/heads/$github_branch/$file";
         return file_get_contents($url);
     }
     return "";
